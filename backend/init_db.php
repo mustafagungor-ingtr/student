@@ -31,4 +31,4 @@ if (!$checkAdmin->fetchColumn()) {
     ]);
 }
 
-echo "Veritabanı hazır. Admin: {$adminEmail} / {$adminPassword}" . PHP_EOL;
+echo "Veritabanı hazır. Admin kullanıcı oluşturuldu: {$adminEmail}" . PHP_EOL;

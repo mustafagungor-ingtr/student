@@ -19,8 +19,8 @@ Bu proje, öğrenci takip ihtiyaçları için hazırlanmış bir MVP uygulamadı
 
 ## Klasör Yapısı
 
-- `/home/runner/work/student/student/backend` → PHP API + MySQL şema
-- `/home/runner/work/student/student/frontend` → React (Vite) arayüz
+- `./backend` → PHP API + MySQL şema
+- `./frontend` → React (Vite) arayüz
 
 ## Gereksinimler
 
@@ -50,7 +50,7 @@ export APP_ORIGIN=http://localhost:5173
 3. Şema ve başlangıç verilerini yükleyin:
 
 ```bash
-cd /home/runner/work/student/student/backend
+cd backend
 php init_db.php
 ```
 
@@ -62,14 +62,14 @@ Bu adım varsayılan admin kullanıcısını da oluşturur:
 4. API’yi çalıştırın:
 
 ```bash
-cd /home/runner/work/student/student/backend
+cd backend
 php -S localhost:8000 index.php
 ```
 
 ## Frontend Kurulumu
 
 ```bash
-cd /home/runner/work/student/student/frontend
+cd frontend
 npm install
 npm run dev
 ```

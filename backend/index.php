@@ -7,6 +7,12 @@ require __DIR__ . '/db.php';
 $config = require __DIR__ . '/config.php';
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
+if ($origin !== '' && $origin !== $config['allowed_origin']) {
+    http_response_code(403);
+    echo json_encode(['message' => 'CORS origin reddedildi.'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 if ($origin === $config['allowed_origin']) {
     header('Access-Control-Allow-Origin: ' . $origin);
 }
