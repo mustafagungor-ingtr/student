@@ -7,7 +7,7 @@ Bu proje, öğrenci takip ihtiyaçları için hazırlanmış bir MVP uygulamadı
 - Login sistemi (admin + öğretmen)
 - Öğrenci ekleme
   - Ders saati
-  - Ders (risale, vecize, kuran)
+  - Ders 
   - Alt ders seçimi/ekleme
   - İsim soyisim, okul, sınıf, telefon
   - Veli adı, veli telefonu
