@@ -1,120 +1,171 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useEffect, useMemo, useState } from 'react'
+import { Alert, Badge, Container, Form, Navbar, Nav, Spinner, Table } from 'react-bootstrap'
+import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import './App.css'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+
+function Dashboard({ students }) {
+  const totalCount = students.length
+  const presentCount = students.filter((student) => student.isPresent).length
+
+  return (
+    <div className="page-content">
+      <h1>Öğrenci Yoklama Sistemi</h1>
+      <p className="lead">React Bootstrap arayüzü ve PostgreSQL destekli backend ile yoklama takibi.</p>
+      <div className="summary-grid">
+        <div className="summary-card">
+          <h2>Toplam Öğrenci</h2>
+          <strong>{totalCount}</strong>
+        </div>
+        <div className="summary-card">
+          <h2>Derste Olan</h2>
+          <strong>{presentCount}</strong>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function AttendancePage({ students, loading, error, onToggle }) {
+  return (
+    <div className="page-content">
+      <h1>Öğrenci Listesi ve Yoklama</h1>
+      <p className="lead">Grid üzerinde seçerek öğrencilerin derste olup olmadığını işaretleyin.</p>
+      {error && <Alert variant="danger">{error}</Alert>}
+      {loading ? (
+        <div className="loading-box">
+          <Spinner animation="border" />
+        </div>
+      ) : (
+        <Table responsive bordered hover className="attendance-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Öğrenci Adı</th>
+              <th>Durum</th>
+              <th>Yoklama</th>
+            </tr>
+          </thead>
+          <tbody>
+            {students.map((student) => (
+              <tr key={student.id}>
+                <td>{student.id}</td>
+                <td>{student.fullName}</td>
+                <td>
+                  <Badge bg={student.isPresent ? 'success' : 'secondary'}>
+                    {student.isPresent ? 'Burada' : 'Yok'}
+                  </Badge>
+                </td>
+                <td>
+                  <Form.Check
+                    type="checkbox"
+                    id={`attendance-${student.id}`}
+                    checked={student.isPresent}
+                    onChange={(event) => onToggle(student.id, event.target.checked)}
+                    label="Katıldı"
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
+    </div>
+  )
+}
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [students, setStudents] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    async function loadStudents() {
+      try {
+        setLoading(true)
+        const response = await fetch(`${API_URL}/api/students`)
+        if (!response.ok) {
+          throw new Error('Öğrenci listesi alınamadı.')
+        }
+        const payload = await response.json()
+        setStudents(payload)
+        setError('')
+      } catch {
+        setError('Backend bağlantısı kurulamadı. API servisinin çalıştığını kontrol edin.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadStudents()
+  }, [])
+
+  const presentCount = useMemo(
+    () => students.filter((student) => student.isPresent).length,
+    [students],
+  )
+
+  async function handleAttendanceToggle(studentId, isPresent) {
+    const previousStudents = students
+    setStudents((currentStudents) =>
+      currentStudents.map((student) =>
+        student.id === studentId ? { ...student, isPresent } : student,
+      ),
+    )
+
+    try {
+      const response = await fetch(`${API_URL}/api/students/${studentId}/attendance`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPresent }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Yoklama güncellenemedi.')
+      }
+    } catch {
+      setStudents(previousStudents)
+      setError('Yoklama güncellemesi başarısız oldu.')
+    }
+  }
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      <Navbar bg="dark" variant="dark" expand="sm" className="mb-4">
+        <Container>
+          <Navbar.Brand>Student App</Navbar.Brand>
+          <Nav className="ms-auto">
+            <Nav.Link as={NavLink} to="/" end>
+              Anasayfa
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="/yoklama">
+              Yoklama
+            </Nav.Link>
+          </Nav>
+        </Container>
+      </Navbar>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+      <Container className="pb-5">
+        <Alert variant="info">
+          Bugünkü yoklama: <strong>{presentCount}</strong> öğrenci derste.
+        </Alert>
+        <Routes>
+          <Route path="/" element={<Dashboard students={students} />} />
+          <Route
+            path="/yoklama"
+            element={
+              <AttendancePage
+                students={students}
+                loading={loading}
+                error={error}
+                onToggle={handleAttendanceToggle}
+              />
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Container>
     </>
   )
 }
