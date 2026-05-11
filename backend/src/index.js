@@ -1,6 +1,7 @@
 require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
+const { rateLimit } = require('express-rate-limit')
 const { Pool } = require('pg')
 
 const app = express()
@@ -8,6 +9,15 @@ const port = Number(process.env.PORT || 3001)
 
 app.use(cors())
 app.use(express.json())
+app.use(
+  '/api',
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 300,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+  }),
+)
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
