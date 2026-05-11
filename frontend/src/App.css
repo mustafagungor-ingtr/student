@@ -1,0 +1,35 @@
+.page-content h1 {
+  margin-bottom: 0.5rem;
+}
+
+.lead {
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.summary-card {
+  border: 1px solid #dee2e6;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background: #fff;
+}
+
+.summary-card strong {
+  font-size: 2rem;
+}
+
+.attendance-table {
+  background: #fff;
+}
+
+.loading-box {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+}
